@@ -1,8 +1,16 @@
 // Async actions
 // performs an async API call to fetch data from an endpoint and use that data in your application
 
+/**
+ * libraries needed:
+ * @axios => requests to an API endpoint
+ * @reduxthunk => redux-thunk define async action creators (middleware)
+ */
+const axios = require("axios");
 const redux = require("redux");
 const createStore = redux.createStore;
+const applyMiddleware = redux.applyMiddleware;
+const thunk = require("redux-thunk").default;
 
 const initialState = {
   loading: false,
@@ -35,6 +43,21 @@ const fetchUsersError = (error) => {
   };
 };
 
+// aysnc action creator => return a function (not pure, can have side effects)
+const fetchUsers = () => {
+  return async function (dispatch) {
+    dispatch(fetchUsersRequest());
+    try {
+      const { data } = await axios.get(
+        "https://jsonplaceholder.typicode.com/users"
+      );
+      dispatch(fetchUsersSuccess(data));
+    } catch (err) {
+      dispatch(fetchUsersError(err.message));
+    }
+  };
+};
+
 // reducer functions
 const reducer = (state = initialState, action) => {
   switch (action.type) {
@@ -50,4 +73,8 @@ const reducer = (state = initialState, action) => {
 };
 
 // store
-const store = createStore(reducer);
+const store = createStore(reducer, applyMiddleware(thunk));
+
+store.subscribe(() => console.log(store.getState()));
+
+store.dispatch(fetchUsers());
