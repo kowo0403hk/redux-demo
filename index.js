@@ -33,27 +33,38 @@
 
 // else, we can just use the common JS syntax
 const redux = require("redux");
+const reduxLogger = require("redux-logger");
 
 const buy_cake = "buy_cake";
-
-const action = {
-  type: buy_cake,
-  info: "first redux action",
-};
+const buy_iceCream = "buy_iceCream";
 
 // action creator (a function that returns an action), so whenever we need to change the action, we can do it here and the entire code base will be updated.
 const buyCake = () => {
-  return action;
+  return {
+    type: buy_cake,
+    info: "first redux action",
+  };
+};
+
+const buyIceCream = () => {
+  return {
+    type: buy_iceCream,
+    info: "second redux action",
+  };
 };
 
 // state
-const initialState = {
+const initialCakeState = {
   numOfCakes: 10,
+};
+
+const initialIceCreamState = {
+  numberOfIceCreams: 20,
 };
 
 // reducer
 // it is important to know that for any action, we are return a new state object instead of mutating the original state object
-const buyCakeReducer = (state = initialState, action) => {
+const cakeReducer = (state = initialCakeState, action) => {
   switch (action.type) {
     case buy_cake:
       return { ...state, numOfCakes: state.numOfCakes - 1 }; //make a new copy of the state first, then return the new state
@@ -62,11 +73,38 @@ const buyCakeReducer = (state = initialState, action) => {
   }
 };
 
+const iceCreamReducer = (state = initialIceCreamState, action) => {
+  switch (action.type) {
+    case buy_iceCream:
+      return { ...state, numberOfIceCreams: state.numberOfIceCreams - 1 };
+    default:
+      return state;
+  }
+};
+
+// combine all reducers
+const combineReducers = redux.combineReducers;
+
+const rootReducer = combineReducers({
+  cake: cakeReducer,
+  ice: iceCreamReducer,
+});
+
+// Middleware
+/**
+ * 1. the suggested way to extend Redux with customer functionality
+ * 2. provides a third-party extension point between @dispatching an @action and the moment it reaches the @reducer
+ * 3. use middleware for logging, crash reporting, performing async tasks, etc.
+ */
+
+const applyMiddleware = redux.applyMiddleware;
+const logger = reduxLogger.createLogger();
+
 // store
 // responsibilities:
 // 1. holds the state of an application
 const createStore = redux.createStore;
-const store = createStore(buyCakeReducer);
+const store = createStore(rootReducer, applyMiddleware(logger));
 
 // 2. allows access to state via getState()
 console.log("Initial state", store.getState());
@@ -81,12 +119,17 @@ console.log("Initial state", store.getState());
 
 // 5. handles unregistering of listeners via the function returned by subscribe(listener)
 const unsubscribe = store.subscribe(
-  () => console.log("Updated state", store.getState()) // because we are calling the store.subscribe() function first, each time we dispatch an action, the store will update and print
+  () => {} // because we are calling the store.subscribe() function first, each time we dispatch an action, the store will update and print
 );
 
 store.dispatch(buyCake());
 store.dispatch(buyCake());
 store.dispatch(buyCake());
+store.dispatch(buyIceCream());
+store.dispatch(buyIceCream());
 
 // unsubscribe to the changes
 unsubscribe();
+
+// Async actions
+// performs an async API call to fetch data from an endpoint and use that data in your application
