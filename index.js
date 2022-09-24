@@ -4,6 +4,10 @@
 /**
  *  @THREE core concepts:
  *  1. @Store --> holds the state of your application (e.g. cake store)
+ *        and allows access to state via getState()
+ *        and allows state to be updated via dispatch(action)
+ *        can register listeners via subscribe(listener)
+ *        can handle unregistering of listeners via the function returned by subscribe(listener)
  *  2. @Action --> describes what happened (e.g. buy a cake)
  *  3. @Reducer --> ties the store and actions together (e.g. shopkeeper give you the cake and reduce the store's inventory)
  */
@@ -24,6 +28,12 @@
  *    switch (action.type) {
  *      case buy_cake: return {number_of_cakes: state.number_of_cakes - 1}}}
  */
+// use the ES6 syntax if we are working on React
+// import {createStore} from "redux";
+
+// else, we can just use the common JS syntax
+const redux = require("redux");
+
 const buy_cake = "buy_cake";
 
 const action = {
@@ -51,3 +61,32 @@ const buyCakeReducer = (state = initialState, action) => {
       return state;
   }
 };
+
+// store
+// responsibilities:
+// 1. holds the state of an application
+const createStore = redux.createStore;
+const store = createStore(buyCakeReducer);
+
+// 2. allows access to state via getState()
+console.log("Initial state", store.getState());
+
+// 3. allows state to be updated via dispatch(action)
+// store.dispatch(buyCake());
+// store.dispatch(buyCake());
+// store.dispatch(buyCake());
+
+// 4. registers listeners via subscribe(listener) -> allow the app to subscribe the changes of the store
+// store.subscribe(() => console.log("updated state", store.getState()));
+
+// 5. handles unregistering of listeners via the function returned by subscribe(listener)
+const unsubscribe = store.subscribe(
+  () => console.log("Updated state", store.getState()) // because we are calling the store.subscribe() function first, each time we dispatch an action, the store will update and print
+);
+
+store.dispatch(buyCake());
+store.dispatch(buyCake());
+store.dispatch(buyCake());
+
+// unsubscribe to the changes
+unsubscribe();
