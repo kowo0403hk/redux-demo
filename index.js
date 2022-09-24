@@ -41,7 +41,7 @@ const action = {
   info: "first redux action",
 };
 
-// action creator (a function that returns an action)
+// action creator (a function that returns an action), so whenever we need to change the action, we can do it here and the entire code base will be updated.
 const buyCake = () => {
   return action;
 };
