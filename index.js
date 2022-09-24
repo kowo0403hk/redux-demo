@@ -130,6 +130,3 @@ store.dispatch(buyIceCream());
 
 // unsubscribe to the changes
 unsubscribe();
-
-// Async actions
-// performs an async API call to fetch data from an endpoint and use that data in your application
